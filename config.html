@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配置 - ADHD学习助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-bold text-center text-indigo-600 mb-6">ADHD学习助手配置</h1>
+            
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold mb-2">Gemini API密钥设置</h2>
+                <p class="text-gray-600 text-sm mb-4">请输入您的Google Gemini API密钥，以启用智能任务拆解功能。密钥将保存在您的浏览器中，不会发送到任何服务器。</p>
+                
+                <div class="mb-4">
+                    <label for="apiKey" class="block text-gray-700 text-sm font-medium mb-2">API密钥</label>
+                    <input type="text" id="apiKey" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="输入您的Gemini API密钥">
+                </div>
+                
+                <button id="saveBtn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    保存设置
+                </button>
+            </div>
+            
+            <div id="statusMessage" class="hidden p-3 rounded-md mb-4"></div>
+            
+            <div class="text-center">
+                <a href="index.html" class="text-indigo-600 hover:text-indigo-800 font-medium">返回主页</a>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">如何获取Gemini API密钥</h3>
+                <ol class="text-sm text-gray-600 list-decimal pl-5 space-y-1">
+                    <li>访问 <a href="https://ai.google.dev/" target="_blank" class="text-indigo-600 hover:underline">Google AI Studio</a></li>
+                    <li>登录您的Google账户</li>
+                    <li>在控制台中找到API密钥选项</li>
+                    <li>创建新的API密钥</li>
+                    <li>复制API密钥并粘贴到上面的输入框中</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载已保存的API密钥（如果有）
+            const savedApiKey = localStorage.getItem('gemini_api_key') || '';
+            document.getElementById('apiKey').value = savedApiKey;
+            
+            // 保存按钮点击事件
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                const apiKey = document.getElementById('apiKey').value.trim();
+                const statusMessage = document.getElementById('statusMessage');
+                
+                if (apiKey) {
+                    // 保存API密钥到localStorage
+                    localStorage.setItem('gemini_api_key', apiKey);
+                    
+                    // 显示成功消息
+                    statusMessage.textContent = '设置已保存！';
+                    statusMessage.className = 'p-3 rounded-md mb-4 bg-green-100 text-green-700';
+                    statusMessage.classList.remove('hidden');
+                } else {
+                    // 显示错误消息
+                    statusMessage.textContent = '请输入有效的API密钥';
+                    statusMessage.className = 'p-3 rounded-md mb-4 bg-red-100 text-red-700';
+                    statusMessage.classList.remove('hidden');
+                }
+                
+                // 3秒后隐藏消息
+                setTimeout(function() {
+                    statusMessage.classList.add('hidden');
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html>
