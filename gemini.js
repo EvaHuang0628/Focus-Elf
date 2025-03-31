@@ -14,10 +14,12 @@ if (typeof window !== 'undefined' && window.localStorage) {
 // 如果需要，可以在这里设置一个硬编码的API密钥（仅用于部署到GitHub Pages）
 // apiKey = apiKey || "YOUR_API_KEY_HERE";
 
-const ai = new GoogleGenAI({ apiKey });
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 async function generateSmartTasks(goal) {
   try {
+    console.log("Generating tasks for goal:", goal);
+
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: `
@@ -41,16 +43,37 @@ ${goal}
     "小目标5"
 ]`,
     });
+    console.log("Response:", response);
+    console.log("Response text:", response.text);
+
     // 处理可能包含Markdown格式的响应文本
     const responseText = response.text;
-    // 移除可能存在的Markdown代码块标记
-    const cleanedText = responseText.replace(/^```json\s*|\s*```$/g, '');
-    return JSON.parse(cleanedText);
+
+    // 更健壮地处理响应文本
+    let jsonString = responseText.trim();
+
+    // 移除Markdown代码块标记（如果有）
+    if (jsonString.startsWith('```json')) {
+      jsonString = jsonString.slice(7); // 移除前7个字符 '```json'
+    }
+    if (jsonString.endsWith('```')) {
+      jsonString = jsonString.slice(0, -3); // 移除后3个字符 '```'
+    }
+
+    // 尝试解析JSON
+    return JSON.parse(jsonString);
   } catch (error) {
-    console.error('Error generating tasks:', error);
-    return DEFAULT_TASKS;
+    // console.log(error);
+    // console.error('Error generating tasks:', error);
+    return [
+      '理解基本概念和原理',
+      '学习核心技术和方法',
+      '完成相关练习和实践',
+      '进行知识总结和复习',
+      '完成测试和评估'
+    ];
   }
 }
 
-// 导出函数，使其可以在其他地方使用
+// 导出函数到GeminiModule对象
 export { generateSmartTasks };

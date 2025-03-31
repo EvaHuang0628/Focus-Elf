@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>主页 - ADHD学习助手</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="/assets/js/noise.js" defer></script>
+    <script src="./assets/js/noise.js" defer></script>
     <script src="./dist/bundle.js" defer></script>
+    <!-- 添加音频元素 -->
+    <audio id="celebrationAudio" src="./assets/audio/celebration.mp3" preload="auto"></audio>
+    <audio id="remindAudio" src="./assets/audio/remind.mp3" preload="auto"></audio>
     <script>
         // 在bundle.js加载完成后，从GeminiModule中获取generateSmartTasks函数
         document.addEventListener('DOMContentLoaded', function() {
@@ -19,9 +25,9 @@
                 console.error('无法加载generateSmartTasks函数，GeminiModule未定义或不包含该函数');
             }
         });
+
     </script>
     <style>
-
         /* 前景动画容器 */
         .foreground-effects {
             position: fixed;
@@ -50,9 +56,11 @@
                 transform: translateY(-100%) rotate(15deg);
                 opacity: 0;
             }
+
             10% {
                 opacity: 1;
             }
+
             100% {
                 transform: translateY(100vh) rotate(15deg);
                 opacity: 0;
@@ -75,6 +83,7 @@
                 left: -50px;
                 transform: translateY(var(--bird-y)) scale(0.8);
             }
+
             100% {
                 left: calc(100% + 50px);
                 transform: translateY(var(--bird-y)) scale(0.8);
@@ -91,6 +100,7 @@
             top: 50%;
             transform: translateY(-50%);
         }
+
         @media (max-width: 768px) {
             .pet-container {
                 width: 100px;
@@ -100,6 +110,7 @@
                 transform: none;
             }
         }
+
         .speech-bubble {
             display: none;
             position: absolute;
@@ -108,7 +119,7 @@
             background: white;
             padding: 8px 12px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             max-width: 500px;
             z-index: 10;
             white-space: normal;
@@ -116,10 +127,19 @@
             font-size: 16px;
             line-height: 1.4;
         }
+
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
+
         .speech-bubble:after {
             content: '';
             position: absolute;
@@ -142,6 +162,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .timer-circle::before {
             content: '';
             position: absolute;
@@ -151,6 +172,7 @@
             background: white;
             z-index: 3;
         }
+
         .timer-circle .timer-content {
             position: absolute;
             z-index: 4;
@@ -162,11 +184,13 @@
             height: 100%;
             color: #1F2937;
         }
+
         .timer-circle .timer-content #time {
             font-size: 2.5rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
+
         .timer-circle .timer-content #status {
             font-size: 1rem;
             color: #6B7280;
@@ -177,18 +201,22 @@
                 width: 160px;
                 height: 160px;
             }
+
             .timer-circle::before {
                 width: 144px;
                 height: 144px;
             }
+
             #time {
                 font-size: 1.5rem;
             }
         }
+
         .timer-display {
             position: relative;
             z-index: 1;
         }
+
         .celebration {
             display: none;
             position: fixed;
@@ -199,13 +227,20 @@
             background: rgba(79, 70, 229, 0.1);
             z-index: 10;
         }
+
         .celebration.active {
             display: flex;
             animation: fadeIn 0.5s ease-out;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .firework {
@@ -222,32 +257,52 @@
                 transform: scale(1);
                 opacity: 1;
             }
+
             100% {
                 transform: scale(20);
                 opacity: 0;
             }
         }
-
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
     <div id="foregroundEffects" class="foreground-effects"></div>
 
-<!-- <body class="min-h-screen bg-gray-100 flex items-center justify-center"> -->
+    <!-- <body class="min-h-screen bg-gray-100 flex items-center justify-center"> -->
 
 
     <main class="flex-1 flex flex-col p-4 space-y-6 overflow-y-auto">
         <div class="flex flex-col md:flex-row items-center relative gap-8">
-            <div class="puzzle-grid grid grid-cols-3 gap-0 w-[302px] h-[302px] border border-gray-200 p-0.5 bg-white rounded-lg shadow-lg hidden md:grid">
-                <div class="puzzle-block w-[100px] h-[100px] bg-blue-200 rounded opacity-0 transition-opacity duration-500"></div>
-                <div class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500"></div>
-                <div class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500"></div>
-                <div class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500"></div>
-                <div class="puzzle-block w-[100px] h-[100px] bg-blue-200 rounded opacity-0 transition-opacity duration-500"></div>
-                <div class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500"></div>
-                <div class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500"></div>
-                <div class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500"></div>
-                <div class="puzzle-block w-[100px] h-[100px] bg-blue-200 rounded opacity-0 transition-opacity duration-500"></div>
+            <div
+                class="puzzle-grid grid grid-cols-3 gap-0 w-[302px] h-[302px] border border-gray-200 p-0.5 bg-white rounded-lg shadow-lg hidden md:grid">
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-blue-200 rounded opacity-0 transition-opacity duration-500">
+                </div>
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
+                </div>
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
+                </div>
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
+                </div>
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-blue-200 rounded opacity-0 transition-opacity duration-500">
+                </div>
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
+                </div>
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
+                </div>
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
+                </div>
+                <div
+                    class="puzzle-block w-[100px] h-[100px] bg-blue-200 rounded opacity-0 transition-opacity duration-500">
+                </div>
             </div>
             <div class="flex flex-col items-center relative">
                 <div class="timer-circle">
@@ -258,10 +313,12 @@
                     </div>
                 </div>
                 <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mt-4">
-                    <button id="startBtn" class="w-full md:w-auto px-6 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center">
+                    <button id="startBtn"
+                        class="w-full md:w-auto px-6 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center">
                         <i class="fas fa-play mr-2"></i>开始
                     </button>
-                    <button id="resetBtn" class="w-full md:w-auto px-6 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center">
+                    <button id="resetBtn"
+                        class="w-full md:w-auto px-6 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center">
                         <i class="fas fa-redo mr-2"></i>重置
                     </button>
                 </div>
@@ -270,101 +327,115 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="bg-white rounded-lg shadow-lg p-4 w-full max-w-4xl mx-auto">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 space-y-2 md:space-y-0">
+            <div
+                class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 space-y-2 md:space-y-0">
                 <h2 class="text-lg font-semibold">今日任务</h2>
                 <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
-                    <button id="clearCompletedBtn" class="w-full md:w-auto px-4 py-3 md:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        <i class="fas fa-trash-alt mr-2"></i>清空已完成
-                    </button>
-                    <button id="exportTasksBtn" class="w-full md:w-auto px-4 py-3 md:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        <i class="fas fa-file-export mr-2"></i>导出任务
-                    </button>
-                    <button id="addTaskBtn" class="w-full md:w-auto px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    <button id="addTaskBtn"
+                        class="w-full md:w-auto px-4 py-3 md:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                         <i class="fas fa-plus mr-2"></i>添加任务
                     </button>
-                    <button id="batchAddTaskBtn" class="w-full md:w-auto px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                        <i class="fas fa-list mr-2"></i>批量添加
-                    </button>
-                    <button id="aiTaskBtn" class="w-full md:w-auto px-4 py-3 md:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    <button id="aiTaskBtn"
+                        class="w-full md:w-auto px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                         <i class="fas fa-robot mr-2"></i>AI分解任务
                     </button>
+                    <div class="relative inline-block text-left w-full md:w-auto">
+                        <button id="moreOptionsBtn"
+                            class="w-full md:w-auto px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center">
+                            <i class="fas fa-ellipsis-h mr-2"></i>更多选项
+                        </button>
+                        <div id="moreOptionsDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1" role="menu" aria-orientation="vertical">
+                                <button id="clearCompletedBtn"
+                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                                    <i class="fas fa-trash-alt mr-2"></i>清空已完成
+                                </button>
+                                <button id="exportTasksBtn"
+                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                                    <i class="fas fa-file-export mr-2"></i>导出任务
+                                </button>
+
+                                <a href="config.html" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                                    <i class="fas fa-cog mr-2"></i>配置API
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div id="taskList" class="space-y-3"></div>
 
             <!-- 批量添加任务模态框 -->
-            <div id="batchAddTaskModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4">
+            <div id="batchAddTaskModal"
+                class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4">
                 <div class="bg-white rounded-lg p-4 md:p-6 w-full max-w-sm md:w-96">
-                    <h3 class="text-lg font-semibold mb-4">批量添加任务</h3>
+                    <h3 class="text-lg font-semibold mb-4">添加任务</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">每行一个任务</label>
-                            <textarea id="batchTaskNames" rows="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base py-2"></textarea>
+                            <label class="block text-sm font-medium text-gray-700">输入任务名称（可输入单行或多行，每行一个任务）</label>
+                            <textarea id="batchTaskNames" rows="5"
+                                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base py-2 px-3"></textarea>
                         </div>
                         <div class="flex justify-end space-x-2">
-                            <button id="cancelBatchAddTask" class="px-4 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-base">取消</button>
-                            <button id="confirmBatchAddTask" class="px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-base">确定</button>
+                            <button id="cancelBatchAddTask"
+                                class="px-4 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-base">取消</button>
+                            <button id="confirmBatchAddTask"
+                                class="px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-base">确定</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 添加任务模态框 -->
-            <div id="addTaskModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4">
-                <div class="bg-white rounded-lg p-4 md:p-6 w-full max-w-sm md:w-96">
-                    <h3 class="text-lg font-semibold mb-4">添加新任务</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">任务名称</label>
-                            <input type="text" id="newTaskName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base py-2">
-                        </div>
-
-                        <div class="flex justify-end space-x-2">
-                            <button id="cancelAddTask" class="px-4 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-base">取消</button>
-                            <button id="confirmAddTask" class="px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-base">确定</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- 添加任务模态框已移除，使用批量添加模态框代替 -->
 
             <!-- AI任务分解模态框 -->
-            <div id="aiTaskModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
+            <div id="aiTaskModal"
+                class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
                 <div class="bg-white rounded-lg p-4 md:p-6 w-full max-w-sm md:w-96">
                     <h3 class="text-lg font-semibold mb-4">AI任务分解</h3>
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">输入你的学习目标</label>
-                            <textarea id="aiTaskInput" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base py-2" placeholder="例如：完成data mining分类算法学习"></textarea>
+                            <textarea id="aiTaskInput" rows="3"
+                                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base py-2 px-3"
+                                placeholder="例如：完成web应用开发并测试"></textarea>
                         </div>
                         <div id="aiTaskResult" class="hidden">
                             <label class="block text-sm font-medium text-gray-700 mb-2">拆解结果</label>
                             <div id="aiTaskList" class="space-y-2 max-h-60 overflow-y-auto"></div>
                         </div>
                         <div class="flex justify-end space-x-2">
-                            <button id="cancelAiTask" class="px-4 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-base">取消</button>
-                            <button id="generateAiTask" class="px-4 py-3 md:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-base">生成任务</button>
-                            <button id="confirmAiTask" class="px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-base hidden">添加到任务列表</button>
+                            <button id="cancelAiTask"
+                                class="px-4 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-base">取消</button>
+                            <button id="generateAiTask"
+                                class="px-4 py-3 md:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-base">生成任务</button>
+                            <button id="confirmAiTask"
+                                class="px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-base hidden">添加到任务列表</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- 编辑任务模态框 -->
-            <div id="editTaskModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50 p-4">
+            <div id="editTaskModal"
+                class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50 p-4">
                 <div class="bg-white rounded-lg p-4 md:p-6 w-full max-w-sm md:w-96">
                     <h3 class="text-lg font-semibold mb-4">编辑任务</h3>
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">任务名称</label>
-                            <input type="text" id="editTaskName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base py-2">
+                            <input type="text" id="editTaskName"
+                                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base py-2 px-3">
                         </div>
 
                         <div class="flex justify-end space-x-2">
-                            <button id="cancelEditTask" class="px-4 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-base">取消</button>
-                            <button id="confirmEditTask" class="px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-base">确定</button>
+                            <button id="cancelEditTask"
+                                class="px-4 py-3 md:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-base">取消</button>
+                            <button id="confirmEditTask"
+                                class="px-4 py-3 md:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-base">确定</button>
                         </div>
                     </div>
                 </div>
@@ -374,9 +445,11 @@
         <div class="bg-white rounded-lg shadow-lg p-4 w-full max-w-4xl mx-auto">
             <h2 class="text-lg font-semibold mb-4">白噪音</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="audio-card border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all cursor-pointer" data-audio-key="rain">
+                <div class="audio-card border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all cursor-pointer"
+                    data-audio-key="rain">
                     <div class="flex items-center space-x-4">
-                        <button class="play-btn w-14 h-14 md:w-12 md:h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors">
+                        <button
+                            class="play-btn w-14 h-14 md:w-12 md:h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors">
                             <i class="fas fa-play text-lg md:text-base"></i>
                         </button>
                         <div class="flex-1">
@@ -385,13 +458,17 @@
                         </div>
                     </div>
                     <div class="mt-6 md:mt-4">
-                        <input type="range" class="volume-slider w-full h-3 md:h-2 bg-gray-200 rounded-lg appearance-none" min="0" max="100" value="50">
+                        <input type="range"
+                            class="volume-slider w-full h-3 md:h-2 bg-gray-200 rounded-lg appearance-none" min="0"
+                            max="100" value="50">
                     </div>
                 </div>
 
-                <div class="audio-card border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all cursor-pointer" data-audio-key="nature">
+                <div class="audio-card border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all cursor-pointer"
+                    data-audio-key="nature">
                     <div class="flex items-center space-x-4">
-                        <button class="play-btn w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors">
+                        <button
+                            class="play-btn w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors">
                             <i class="fas fa-play"></i>
                         </button>
                         <div class="flex-1">
@@ -400,13 +477,16 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <input type="range" class="volume-slider w-full h-2 bg-gray-200 rounded-lg appearance-none" min="0" max="100" value="50">
+                        <input type="range" class="volume-slider w-full h-2 bg-gray-200 rounded-lg appearance-none"
+                            min="0" max="100" value="50">
                     </div>
                 </div>
 
-                <div class="audio-card border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all cursor-pointer" data-audio-key="white-noise">
+                <div class="audio-card border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all cursor-pointer"
+                    data-audio-key="white-noise">
                     <div class="flex items-center space-x-4">
-                        <button class="play-btn w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors">
+                        <button
+                            class="play-btn w-12 h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors">
                             <i class="fas fa-play"></i>
                         </button>
                         <div class="flex-1">
@@ -415,7 +495,8 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <input type="range" class="volume-slider w-full h-2 bg-gray-200 rounded-lg appearance-none" min="0" max="100" value="50">
+                        <input type="range" class="volume-slider w-full h-2 bg-gray-200 rounded-lg appearance-none"
+                            min="0" max="100" value="50">
                     </div>
                 </div>
             </div>
@@ -429,7 +510,8 @@
             <p class="text-gray-600 mt-2 text-base">你已经专注学习了<span id="completedTime">25</span>分钟</p>
             <div class="mt-4 space-y-2">
                 <p class="text-gray-700 mb-2 text-sm">还学得动吗？</p>
-                <button id="continueTaskBtn" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                <button id="continueTaskBtn"
+                    class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                     继续学
                 </button>
                 <button id="completeTaskBtn"
@@ -441,231 +523,257 @@
     </div>
 
     <script>
-        function showNextBlock() {
-            const currentBlock = blockCount % 9;
-            if (currentBlock < 9) {
-                const puzzleBlocks = document.querySelectorAll('.puzzle-block');
-                puzzleBlocks[currentBlock].style.opacity = '1';
-            }
-            blockCount++;
-            localStorage.setItem('blockCount', blockCount);
-            
-            if (blockCount % 9 === 0) {
-                setTimeout(() => {
-                    createFireworks();
-                    // 重置拼图
-                    setTimeout(() => {
-                        document.querySelectorAll('.puzzle-block').forEach(block => {
-                            block.style.opacity = '0';
-                        });
-                    }, 2000);
-                    wishCount++;
-                    localStorage.setItem('wishCount', wishCount);
-                    showSpeechBubble(`恭喜获得一次许愿机会！当前许愿次数：${wishCount}`);
-                }, 500);
-            }
-        }
+                function showNextBlock() {
+                    const currentBlock = blockCount % 9;
+                    if (currentBlock < 9) {
+                        const puzzleBlocks = document.querySelectorAll('.puzzle-block');
+                        puzzleBlocks[currentBlock].style.opacity = '1';
+                    }
+                    blockCount++;
+                    localStorage.setItem('blockCount', blockCount);
 
-        function createFireworks() {
-            for (let i = 0; i < 10; i++) {
-                setTimeout(() => {
-                    const firework = document.createElement('div');
-                    firework.className = 'firework';
-                    firework.style.left = Math.random() * window.innerWidth + 'px';
-                    firework.style.top = Math.random() * window.innerHeight + 'px';
-                    firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                    document.body.appendChild(firework);
+                    if (blockCount % 9 === 0) {
+                        setTimeout(() => {
+                            createFireworks();
+                            // 重置拼图
+                            setTimeout(() => {
+                                document.querySelectorAll('.puzzle-block').forEach(block => {
+                                    block.style.opacity = '0';
+                                });
+                            }, 2000);
+                            blockCount = 0;
+                            localStorage.setItem('blockCount', blockCount);
+                            wishCount++;
+                            localStorage.setItem('wishCount', wishCount);
+                            showSpeechBubble(`每次完成任务都在强化前额叶的专注肌肉！许愿次数+1！当前许愿次数：${wishCount}`);
+                        }, 500);
+                    }
+                }
+
+                function createFireworks() {
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            const firework = document.createElement('div');
+                            firework.className = 'firework';
+                            firework.style.left = Math.random() * window.innerWidth + 'px';
+                            firework.style.top = Math.random() * window.innerHeight + 'px';
+                            firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                            document.body.appendChild(firework);
+
+                            setTimeout(() => {
+                                document.body.removeChild(firework);
+                            }, 1000);
+                        }, i * 200);
+                    }
+                }
+
+                let timer;
+                let idleTimer; // 闲置检测计时器
+                let isTestMode = true; // 控制测试模式和正常模式的切换
+                let timeLeft = isTestMode ? 5 : 25 * 60; // 根据模式设置初始时间
+                let isRunning = false;
+                let currentTask = null;
+                let blockCount = parseInt(localStorage.getItem('blockCount')) || 0;
+                let wishCount = parseInt(localStorage.getItem('wishCount')) || 0;
+                const lastVisitDate = localStorage.getItem('lastVisitDate');
+                const today = new Date().toDateString();
+                let lastActivityTime = Date.now(); // 记录最后活动时间
+                
+                // 初始化时更新显示
+                document.addEventListener('DOMContentLoaded', function() {
+                    updateDisplay();
+                    
+                    // 启动闲置检测计时器
+                    startIdleDetection();
+                });
+                
+                // 检查是否是今天第一次访问
+                if (lastVisitDate !== today) {
+                    localStorage.setItem('lastVisitDate', today);
+                    showNextBlock();
+                }
+
+                // 显示已有的拼图块
+                const puzzleBlocks = document.querySelectorAll('.puzzle-block');
+                for (let i = 0; i < blockCount % 9; i++) {
+                    puzzleBlocks[i].style.opacity = '1';
+                }
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+                function saveTasks() {
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                }
+                let doneList = [];
+
+                const timeDisplay = document.getElementById('time');
+                const statusDisplay = document.getElementById('status');
+                const startBtn = document.getElementById('startBtn');
+                const resetBtn = document.getElementById('resetBtn');
+                const timerCircle = document.querySelector('.timer-circle');
+                const celebration = document.getElementById('celebration');
+                const addTaskBtn = document.getElementById('addTaskBtn');
+                // 将clearCompletedBtn的获取移到DOM完全加载后
+
+                // 页面加载时显示欢迎信息
+
+
+                window.addEventListener('load', () => {
+                    showSpeechBubble(`检测到聪明脑电波！当前专注能量：${blockCount}格，许愿次数：${wishCount}`);
+
+                    // 为宠物添加单击事件，显示blockCount和wishCount
+                    const petContainer = document.getElementById('petContainer');
+                    petContainer.addEventListener('click', function (event) {
+                        // 防止双击事件同时触发单击事件
+                        if (event.detail === 1) {
+                            setTimeout(() => {
+                                showSpeechBubble(`当前专注能量：${blockCount}格，许愿次数：${wishCount}`);
+                            }, 200);
+                        }
+                    });
+
+                    // 为宠物添加双击事件，减少wishCount并触发烟花特效
+                    petContainer.addEventListener('dblclick', function () {
+                        if (wishCount > 0) {
+                            wishCount--;
+                            localStorage.setItem('wishCount', wishCount);
+                            createFireworks();
+                            showSpeechBubble(`许愿成功！剩余许愿次数：${wishCount}`);
+                        } else {
+                            showSpeechBubble('没有许愿次数了，要继续积累许愿机会吗？');
+                        }
+                    });
+                });
+
+                function updateDisplay() {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                    // 根据测试模式计算不同的进度
+                    const totalTime = isTestMode ? 5 : 25 * 60;
+                    const progress = ((totalTime - timeLeft) / totalTime) * 100;
+                    timerCircle.style.background = `conic-gradient(#4F46E5 ${progress}%, #E5E7EB ${progress}%)`;
+                }
+
+                /**
+                 * 切换计时器状态（开始/暂停）
+                 * - 暂停时：清除计时器并更新UI状态
+                 * - 开始时：启动计时器，每秒更新剩余时间
+                 * - 计时结束时：更新任务时间、显示庆祝效果
+                 */
+                function toggleTimer() {
+                    if (isRunning) { // 暂停状态
+                        clearInterval(timer); // 清除计时器
+                        startBtn.innerHTML = '<i class="fas fa-play mr-2"></i>继续';
+                        statusDisplay.textContent = '已暂停';
+                    } else { // 开始状态
+                        timer = setInterval(() => {
+                            if (timeLeft > 0) {
+                                timeLeft--;
+                                updateDisplay();
+                                statusDisplay.textContent = '专注中';
+                            } else { // 计时完成
+                                clearInterval(timer); // 停止计时器
+                                document.getElementById('completedTime').textContent = isTestMode ? '5秒' : '25分钟';
+                                celebration.style.display = 'block'; // 确保庆祝窗口可见
+                                celebration.classList.add('active');
+
+                                // 播放庆祝音效
+                                const celebrationAudio = document.getElementById('celebrationAudio');
+                                celebrationAudio.currentTime = 0; // 重置音频播放位置
+                                celebrationAudio.play();
+
+                                // 更新当前任务的累计用时
+                                if (currentTask) {
+                                    currentTask.totalTime += isTestMode ? Number((5/60).toFixed(2)) : 25; // 测试模式下增加5秒（转换为分钟，保留两位小数），否则增加25分钟
+                                    tasks = tasks.map(t => t.id === currentTask.id ? currentTask : t);
+                                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                                    renderTasks();
+                                }
+                                // 显示新的拼图块并添加烟花效果
+                                showNextBlock();
+                                createFireworks();
+                                
+                                // 重置最后活动时间
+                                lastActivityTime = Date.now();
+                            }
+                        }, 1000);
+                        startBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>暂停';
+                        statusDisplay.textContent = '专注中';
+                    }
+                    isRunning = !isRunning;
+                }
+
+                function resetTimer() {
+                    clearInterval(timer);
+                    timeLeft = isTestMode ? 5 : 25 * 60;
+                    isRunning = false;
+                    startBtn.innerHTML = '<i class="fas fa-play mr-2"></i>开始';
+                    statusDisplay.textContent = '准备开始';
+                    currentTask = null;
+                    const currentTaskDisplay = document.getElementById('currentTaskDisplay');
+                    currentTaskDisplay.classList.add('hidden');
+                    currentTaskDisplay.textContent = '';
+
+                    celebration.classList.remove('active');
+                    celebration.style.display = 'none';
+                    updateDisplay();
+                }
+
+                function showSpeechBubble(text) {
+                    const bubble = document.getElementById('speechBubble');
+                    bubble.textContent = text;
+                    bubble.style.display = 'block';
+                    bubble.style.width = '180px';     // 设置宽度
+                    bubble.style.height = 'auto';    // 高度自动适应内容
                     
                     setTimeout(() => {
-                        document.body.removeChild(firework);
-                    }, 1000);
-                }, i * 200);
-            }
-        }
-
-        let timer;
-        let timeLeft = 5; // 25 minutes in seconds
-        let isRunning = false;
-        let currentTask = null;
-        let blockCount = parseInt(localStorage.getItem('blockCount')) || 0;
-        let wishCount = parseInt(localStorage.getItem('wishCount')) || 0;
-        const lastVisitDate = localStorage.getItem('lastVisitDate');
-        const today = new Date().toDateString();
-        
-        // 检查是否是今天第一次访问
-        if (lastVisitDate !== today) {
-            localStorage.setItem('lastVisitDate', today);
-            showNextBlock();
-        }
-        
-        // 显示已有的拼图块
-        const puzzleBlocks = document.querySelectorAll('.puzzle-block');
-        for (let i = 0; i < blockCount % 9; i++) {
-            puzzleBlocks[i].style.opacity = '1';
-        }
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || [
-            { id: 1, name: '完成数学作业', completed: false, totalTime: 0 },
-            { id: 2, name: '阅读英语文章', completed: false, totalTime: 0 }
-        ];
-        let doneList = [];
-
-        const timeDisplay = document.getElementById('time');
-        const statusDisplay = document.getElementById('status');
-        const startBtn = document.getElementById('startBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const timerCircle = document.querySelector('.timer-circle');
-        const celebration = document.getElementById('celebration');
-        const addTaskBtn = document.getElementById('addTaskBtn');
-        const clearCompletedBtn = document.getElementById('clearCompletedBtn');
-
-        // 页面加载时显示欢迎信息
-
-
-        window.addEventListener('load', () => {
-            showSpeechBubble(`检测到聪明脑电波！当前专注能量槽：${blockCount}%，许愿次数：${wishCount}`);
-            
-            // 为宠物添加单击事件，显示blockCount和wishCount
-            const petContainer = document.getElementById('petContainer');
-            petContainer.addEventListener('click', function(event) {
-                // 防止双击事件同时触发单击事件
-                if (event.detail === 1) {
-                    setTimeout(() => {
-                        showSpeechBubble(`当前专注能量槽：${blockCount}，许愿次数：${wishCount}`);
-                    }, 200);
+                        bubble.style.display = 'none';
+                        bubble.style.width = ''; // 清除宽度，防止影响后续显示
+                    }, 5000);
                 }
-            });
-            
-            // 为宠物添加双击事件，减少wishCount并触发烟花特效
-            petContainer.addEventListener('dblclick', function() {
-                if (wishCount > 0) {
-                    wishCount--;
-                    localStorage.setItem('wishCount', wishCount);
-                    createFireworks();
-                    showSpeechBubble(`许愿成功！剩余许愿次数：${wishCount}`);
-                } else {
-                    showSpeechBubble('没有许愿次数了，继续专注学习获取更多许愿机会吧！');
-                }
-            });
-        });
 
-        function updateDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            const progress = ((25 * 60 - timeLeft) / (25 * 60)) * 100;
-            timerCircle.style.background = `conic-gradient(#4F46E5 ${progress}%, #E5E7EB ${progress}%)`;
-            
-        }
-
-        /**
-         * 切换计时器状态（开始/暂停）
-         * - 暂停时：清除计时器并更新UI状态
-         * - 开始时：启动计时器，每秒更新剩余时间
-         * - 计时结束时：更新任务时间、显示庆祝效果
-         */
-        function toggleTimer() {
-            if (isRunning) { // 暂停状态
-                clearInterval(timer); // 清除计时器
-                startBtn.innerHTML = '<i class="fas fa-play mr-2"></i>继续';
-                statusDisplay.textContent = '已暂停';
-            } else { // 开始状态
-                timer = setInterval(() => {
-                    if (timeLeft > 0) {
-                        timeLeft--;
-                        updateDisplay();
-                        statusDisplay.textContent = '专注中';
-                    } else { // 计时完成
-                        clearInterval(timer); // 停止计时器
-                        document.getElementById('completedTime').textContent = '25';
-                        celebration.style.display = 'block'; // 确保庆祝窗口可见
-                        celebration.classList.add('active');
-                        
-                        // 更新当前任务的累计用时
-                        if (currentTask) {
-                            currentTask.totalTime += 25;
-                            tasks = tasks.map(t => t.id === currentTask.id ? currentTask : t);
-                            localStorage.setItem('tasks', JSON.stringify(tasks));
-                            renderTasks();
-                        }
-                        // 显示新的拼图块并添加烟花效果
-                        showNextBlock();
-                        createFireworks();
-                    }
-                }, 1000);
-                startBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>暂停';
-                statusDisplay.textContent = '专注中';
-            }
-            isRunning = !isRunning;
-        }
-
-        function resetTimer() {
-            clearInterval(timer);
-            // timeLeft = 25 * 60;
-            timeLeft = 5;
-            isRunning = false;
-            startBtn.innerHTML = '<i class="fas fa-play mr-2"></i>开始';
-            statusDisplay.textContent = '准备开始';
-            currentTask = null;
-            const currentTaskDisplay = document.getElementById('currentTaskDisplay');
-            currentTaskDisplay.classList.add('hidden');
-            currentTaskDisplay.textContent = '';
-
-            celebration.classList.remove('active');
-            celebration.style.display = 'none';
-            updateDisplay();
-        }
-
-        function showSpeechBubble(text) {
-            const bubble = document.getElementById('speechBubble');
-            bubble.textContent = text;
-            bubble.style.display = 'block';
-            setTimeout(() => {
-                bubble.style.display = 'none';
-            }, 5000);
-        }
-
-        function renderTasks() {
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = '';
-            tasks.forEach(task => {
-                const taskElement = document.createElement('div');
-                taskElement.className = 'task-item flex items-center p-3 bg-gray-50 rounded-lg';
-                taskElement.innerHTML = `
+                function renderTasks() {
+                    const taskList = document.getElementById('taskList');
+                    taskList.innerHTML = '';
+                    tasks.forEach(task => {
+                        const taskElement = document.createElement('div');
+                        taskElement.className = 'task-item flex items-center p-3 bg-gray-50 rounded-lg';
+                        taskElement.innerHTML = `
                     <input type="checkbox" class="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500" 
                            ${task.completed ? 'checked' : ''} onchange="toggleTaskStatus(${task.id})">
                     <div class="ml-3 flex-1">
                         <p class="text-gray-800 ${task.completed ? 'line-through' : ''}">${task.name}</p>
-                        ${task.totalTime > 0 ? `<p class="text-sm text-gray-500">累计专注：${task.totalTime}分钟</p>` : ''}
+                        ${task.totalTime > 0 ? `<p class="text-sm text-gray-500">累计专注：${Number(task.totalTime).toFixed(2)}分钟</p>` : ''}
                     </div>
                     <button class="text-gray-400 hover:text-gray-600" onclick="editTask(${task.id})">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
                 `;
-                taskList.appendChild(taskElement);
-            });
-        }
+                        taskList.appendChild(taskElement);
+                    });
+                }
 
-        function addTask() {
-            const addTaskModal = document.getElementById('addTaskModal');
-            addTaskModal.style.display = 'flex';
-        }
+                // 添加任务函数已修改为直接使用批量添加功能
+function addTask() {
+                    batchAddTask();
+                }
 
-        function batchAddTask() {
-            const batchAddTaskModal = document.getElementById('batchAddTaskModal');
-            batchAddTaskModal.style.display = 'flex';
-        }
+                function batchAddTask() {
+                    const batchAddTaskModal = document.getElementById('batchAddTaskModal');
+                    batchAddTaskModal.style.display = 'flex';
+                }
 
-        function editTask(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                const menu = document.createElement('div');
-                const button = event.target.closest('button');
-                const rect = button.getBoundingClientRect();
-                menu.className = 'fixed w-48 bg-white rounded-md shadow-lg z-50';
-                menu.style.top = `${rect.top}px`;
-                menu.style.left = `${rect.right + 5}px`;
-                menu.innerHTML = `
+                function editTask(taskId) {
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        const menu = document.createElement('div');
+                        const button = event.target.closest('button');
+                        const rect = button.getBoundingClientRect();
+                        menu.className = 'fixed w-48 bg-white rounded-md shadow-lg z-50';
+                        menu.style.top = `${rect.top}px`;
+                        menu.style.left = `${rect.right + 5}px`;
+                        menu.innerHTML = `
                     <div class="py-1">
                         <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="showEditTaskModal(${taskId})">
                             <i class="fas fa-edit mr-2"></i>编辑任务
@@ -673,311 +781,362 @@
                         <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="selectTaskForTimer(${taskId})">
                             <i class="fas fa-clock mr-2"></i>选择此任务
                         </button>
+                        <button class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100" onclick="deleteTask(${taskId})">
+                            <i class="fas fa-trash-alt mr-2"></i>删除任务
+                        </button>
                     </div>
                 `;
-                document.body.appendChild(menu);
-                
-                // 点击其他地方关闭菜单
-                const closeMenu = (e) => {
-                    if (!menu.contains(e.target)) {
-                        menu.remove();
-                        document.removeEventListener('click', closeMenu);
+                        document.body.appendChild(menu);
+
+                        // 点击其他地方关闭菜单
+                        const closeMenu = (e) => {
+                            if (!menu.contains(e.target)) {
+                                menu.remove();
+                                document.removeEventListener('click', closeMenu);
+                            }
+                        };
+                        setTimeout(() => document.addEventListener('click', closeMenu), 0);
                     }
-                };
-                setTimeout(() => document.addEventListener('click', closeMenu), 0);
-            }
-        }
+                }
 
-        function showEditTaskModal(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                const editTaskModal = document.getElementById('editTaskModal');
-                const editTaskName = document.getElementById('editTaskName');
-                editTaskName.value = task.name;
-                editTaskModal.dataset.taskId = taskId;
-                editTaskModal.style.display = 'flex';
-            }
-        }
+                function showEditTaskModal(taskId) {
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        const editTaskModal = document.getElementById('editTaskModal');
+                        const editTaskName = document.getElementById('editTaskName');
+                        editTaskName.value = task.name;
+                        editTaskModal.dataset.taskId = taskId;
+                        editTaskModal.style.display = 'flex';
+                    }
+                }
 
-        function selectTaskForTimer(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                currentTask = task;
-                const currentTaskDisplay = document.getElementById('currentTaskDisplay');
-                currentTaskDisplay.textContent = `当前任务：${task.name}`;
-                currentTaskDisplay.classList.remove('hidden');
-                showSpeechBubble(`已选择任务：${task.name}`);
-            }
-        }
+                function selectTaskForTimer(taskId) {
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        currentTask = task;
+                        const currentTaskDisplay = document.getElementById('currentTaskDisplay');
+                        currentTaskDisplay.textContent = `当前任务：${task.name}`;
+                        currentTaskDisplay.classList.remove('hidden');
+                        showSpeechBubble(`已选择任务：${task.name}，脑科学证明：开始行动后3分钟，专注力会自然提升！你已经成功迈出最难的第一步！`);
+                    }
+                }
 
-        function toggleTaskStatus(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.completed = !task.completed;
-                renderTasks();
-            }
-        }
+                function deleteTask(taskId) {
+                    if (confirm('确定要删除这个任务吗？')) {
+                        // 检查是否删除的是当前任务
+                        if (currentTask && currentTask.id === taskId) {
+                            currentTask = null;
+                            resetTimer();
+                            currentTaskDisplay.classList.add('hidden');
+                        }
+                        tasks = tasks.filter(t => t.id !== taskId);
+                        saveTasks();
+                        renderTasks();
+                        closeMenu();
+                    }
+                }
 
-        function clearCompletedTasks() {
-            tasks = tasks.filter(task => !task.completed);
-            renderTasks();
-        }
+                function toggleTaskStatus(taskId) {
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.completed = !task.completed;
+                        
+                        // 如果任务被标记为完成，添加到doneList
+                        if (task.completed) {
+                            doneList.push({
+                                task_name: task.name,
+                                duration_minutes: task.totalTime
+                            });
+                            showSpeechBubble('任务达成！保持这个节奏就像超级英雄维持变身状态！');
+                        } else {
+                            // 如果任务从完成变为未完成，从doneList中移除
+                            doneList = doneList.filter(item => item.task_name !== task.name);
+                        }
+                        
+                        saveTasks();
+                        renderTasks();
+                    }
+                }
 
-        function completeTask() {
-            if (currentTask) {
-                const task = tasks.find(t => t.id === currentTask.id);
-                if (task) {
-                    task.completed = true;
-                    task.totalTime += 25;
-                    // 添加到doneList
-                    doneList.push({
-                        task_name: task.name,
-                        duration_minutes: task.totalTime
+                function clearCompletedTasks() {
+                    // 获取所有已完成任务的名称
+                    const completedTaskNames = tasks.filter(task => task.completed).map(task => task.name);
+                    
+                    // 从doneList中移除这些任务
+                    doneList = doneList.filter(item => !completedTaskNames.includes(item.task_name));
+                    
+                    // 从tasks列表中移除已完成任务
+                    tasks = tasks.filter(task => !task.completed);
+                    saveTasks();
+                    renderTasks();
+                    
+                    showSpeechBubble('已清空完成的任务！');
+                }
+
+                function completeTask() {
+                    if (currentTask) {
+                        const task = tasks.find(t => t.id === currentTask.id);
+                        if (task) {
+                            task.completed = true;
+                            task.totalTime += isTestMode ? Number((5/60).toFixed(2)) : 25; // 测试模式下增加5秒（转换为分钟，保留两位小数），否则增加25分钟
+                            // 添加到doneList
+                            doneList.push({
+                                task_name: task.name,
+                                duration_minutes: task.totalTime
+                            });
+                            saveTasks();
+                            renderTasks();
+
+                            currentTask = null;
+                            resetTimer();
+                            createFireworks();
+                            showSpeechBubble('完成闭环！大脑刚建立了新的神经通路，这比喝10杯咖啡还有效');
+                        }
+                    } else {
+                        resetTimer();
+                        createFireworks();
+                        showSpeechBubble('你的基底核正在释放奖励性神经递质，享受这个胜利时刻！');
+                    }
+                }
+
+                function continueTask() {
+                    setTimeout(() => {
+                        resetTimer();
+                        // timeLeft = 25 * 60;
+                        timeLeft = 5;
+                        updateDisplay();
+                        showSpeechBubble('开始新一轮计时！加油！');
+                    }, 2000);
+                }
+
+                // 导出任务功能
+                function exportTasks() {
+                    if (doneList.length === 0) {
+                        showSpeechBubble('没有已完成的任务可导出！');
+                        return;
+                    }
+
+                    const today = new Date().toISOString().split('T')[0];
+                    let existingData = localStorage.getItem('daily_records') || '{"daily_records": []}';
+                    let jsonData = JSON.parse(existingData);
+
+                    // 添加今天的记录
+                    jsonData.daily_records.unshift({
+                        date: today,
+                        "Number of blocks": doneList.reduce((acc, task) => acc + Math.ceil(task.duration_minutes / 25), 0),
+                        "Number of wishes": wishCount,
+                        tasks: [...doneList]
+                    });
+
+                    // 保存到localStorage
+                    localStorage.setItem('daily_records', JSON.stringify(jsonData));
+
+                    // 下载JSON文件
+                    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `doneList_${today}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    // 清空doneList
+                    doneList = [];
+                    showSpeechBubble('任务记录已成功导出！');
+                }
+
+                // 批量添加任务事件已移至addTaskBtn
+                document.getElementById('exportTasksBtn').addEventListener('click', exportTasks);
+                document.getElementById('cancelBatchAddTask').addEventListener('click', () => {
+                    document.getElementById('batchAddTaskModal').style.display = 'none';
+                    document.getElementById('batchTaskNames').value = '';
+                });
+                document.getElementById('confirmBatchAddTask').addEventListener('click', () => {
+                    const taskNames = document.getElementById('batchTaskNames').value.split('\n').filter(name => name.trim());
+                    taskNames.forEach(name => {
+                        const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) : 0;
+                        const newTask = {
+                            id: maxId + 1,
+                            name: name.trim(),
+                            completed: false,
+                            totalTime: 0
+                        };
+                        tasks.push(newTask);
+                        saveTasks();
                     });
                     renderTasks();
-                
-                    currentTask = null;
-                    resetTimer();
-                    createFireworks();
-                    showSpeechBubble('太棒了！任务完成啦！');
-                }
-            } else {
-                resetTimer();
-                createFireworks();
-                showSpeechBubble('太棒了！任务完成啦！');
-            }
-        }
+                    document.getElementById('batchAddTaskModal').style.display = 'none';
+                    document.getElementById('batchTaskNames').value = '';
+                });
 
-        function continueTask() {
-            setTimeout(() => {
-                resetTimer();
-                // timeLeft = 25 * 60;
-                timeLeft = 5;
-                updateDisplay();
-                showSpeechBubble('开始新一轮计时！加油！');
-            }, 2000);
-        }
+                // 单任务添加模态框事件已移除，使用批量添加功能代替
 
-        // 导出任务功能
-        function exportTasks() {
-            if (doneList.length === 0) {
-                showSpeechBubble('没有已完成的任务可导出！');
-                return;
-            }
+                // 编辑任务模态框事件
+                document.getElementById('confirmEditTask').addEventListener('click', () => {
+                    const taskId = parseInt(document.getElementById('editTaskModal').dataset.taskId);
+                    const taskName = document.getElementById('editTaskName').value;
+                    if (taskName) {
+                        const task = tasks.find(t => t.id === taskId);
+                        if (task) {
+                            task.name = taskName;
+                            renderTasks();
+                        }
+                        document.getElementById('editTaskModal').style.display = 'none';
+                    }
+                });
 
-            const today = new Date().toISOString().split('T')[0];
-            let existingData = localStorage.getItem('daily_records') || '{"daily_records": []}';
-            let jsonData = JSON.parse(existingData);
-
-            // 添加今天的记录
-            jsonData.daily_records.unshift({
-                date: today,
-                "Number of blocks": doneList.reduce((acc, task) => acc + Math.ceil(task.duration_minutes / 25), 0),
-                "Number of wishes": wishCount,
-                tasks: [...doneList]
-            });
-
-            // 保存到localStorage
-            localStorage.setItem('daily_records', JSON.stringify(jsonData));
-
-            // 下载JSON文件
-            const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `doneList_${today}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            // 清空doneList
-            doneList = [];
-            showSpeechBubble('任务记录已成功导出！');
-        }
-
-        // 批量添加任务事件
-        document.getElementById('batchAddTaskBtn').addEventListener('click', batchAddTask);
-        document.getElementById('exportTasksBtn').addEventListener('click', exportTasks);
-        document.getElementById('cancelBatchAddTask').addEventListener('click', () => {
-            document.getElementById('batchAddTaskModal').style.display = 'none';
-            document.getElementById('batchTaskNames').value = '';
-        });
-        document.getElementById('confirmBatchAddTask').addEventListener('click', () => {
-            const taskNames = document.getElementById('batchTaskNames').value.split('\n').filter(name => name.trim());
-            taskNames.forEach(name => {
-                const newTask = {
-                    id: tasks.length + 1,
-                    name: name.trim(),
-                    completed: false,
-                    totalTime: 0
-                };
-                tasks.push(newTask);
-            });
-            renderTasks();
-            document.getElementById('batchAddTaskModal').style.display = 'none';
-            document.getElementById('batchTaskNames').value = '';
-        });
-
-        // 添加任务模态框事件
-        document.getElementById('confirmAddTask').addEventListener('click', () => {
-            const taskName = document.getElementById('newTaskName').value;
-            if (taskName) {
-                const newTask = {
-                    id: tasks.length + 1,
-                    name: taskName,
-                    completed: false,
-                    totalTime: 0
-                };
-                tasks.push(newTask);
-                renderTasks();
-                document.getElementById('addTaskModal').style.display = 'none';
-                document.getElementById('newTaskName').value = '';
-
-            }
-        });
-
-        document.getElementById('cancelAddTask').addEventListener('click', () => {
-            document.getElementById('addTaskModal').style.display = 'none';
-        });
-
-        // 编辑任务模态框事件
-        document.getElementById('confirmEditTask').addEventListener('click', () => {
-            const taskId = parseInt(document.getElementById('editTaskModal').dataset.taskId);
-            const taskName = document.getElementById('editTaskName').value;
-            if (taskName) {
-                const task = tasks.find(t => t.id === taskId);
-                if (task) {
-                    task.name = taskName;
-                    renderTasks();
-                }
-                document.getElementById('editTaskModal').style.display = 'none';
-            }
-        });
-
-        document.getElementById('cancelEditTask').addEventListener('click', () => {
-            document.getElementById('editTaskModal').style.display = 'none';
-        });
+                document.getElementById('cancelEditTask').addEventListener('click', () => {
+                    document.getElementById('editTaskModal').style.display = 'none';
+                });
 
 
-        document.getElementById('cancelAiTask').addEventListener('click', () => {
-            document.getElementById('aiTaskModal').style.display = 'none';
-        });
+                document.getElementById('cancelAiTask').addEventListener('click', () => {
+                    document.getElementById('aiTaskModal').style.display = 'none';
+                });
 
-        // AI任务按钮点击事件
-        document.getElementById('aiTaskBtn').addEventListener('click', () => {
-            document.getElementById('aiTaskModal').style.display = 'flex';
-            document.getElementById('aiTaskResult').classList.add('hidden');
-            document.getElementById('confirmAiTask').classList.add('hidden');
-            document.getElementById('generateAiTask').classList.remove('hidden');
-            document.getElementById('aiTaskInput').value = '';
-            document.getElementById('aiTaskList').innerHTML = '';
-        });
+                // AI任务按钮点击事件
+                document.getElementById('aiTaskBtn').addEventListener('click', () => {
+                    document.getElementById('aiTaskModal').style.display = 'flex';
+                    document.getElementById('aiTaskResult').classList.add('hidden');
+                    document.getElementById('confirmAiTask').classList.add('hidden');
+                    document.getElementById('generateAiTask').classList.remove('hidden');
+                    document.getElementById('aiTaskInput').value = '';
+                    document.getElementById('aiTaskList').innerHTML = '';
+                });
 
-        // 生成AI任务按钮点击事件
-        document.getElementById('generateAiTask').addEventListener('click', async () => {
-            const goal = document.getElementById('aiTaskInput').value.trim();
-            if (!goal) {
-                showSpeechBubble('请输入学习目标！');
-                return;
-            }
+                // 生成AI任务按钮点击事件
+                document.getElementById('generateAiTask').addEventListener('click', async () => {
+                    const goal = document.getElementById('aiTaskInput').value.trim();
+                    if (!goal) {
+                        showSpeechBubble('请输入学习目标！');
+                        return;
+                    }
 
-            document.getElementById('generateAiTask').textContent = '生成中...';
-            document.getElementById('generateAiTask').disabled = true;
+                    document.getElementById('generateAiTask').textContent = '生成中...';
+                    document.getElementById('generateAiTask').disabled = true;
 
-            try {
-                // 调用gemini.js中的generateSmartTasks函数
-                const tasks = await generateSmartTasks(goal);
-                
-                // 显示结果
-                document.getElementById('aiTaskList').innerHTML = '';
-                tasks.forEach(task => {
-                    const taskItem = document.createElement('div');
-                    taskItem.className = 'flex items-center space-x-2';
-                    taskItem.innerHTML = `
+                    try {
+                        // 调用gemini.js中的generateSmartTasks函数
+                        const tasks = await generateSmartTasks(goal);
+
+                        // 显示结果
+                        document.getElementById('aiTaskList').innerHTML = '';
+                        tasks.forEach(task => {
+                            const taskItem = document.createElement('div');
+                            taskItem.className = 'flex items-center space-x-2';
+                            taskItem.innerHTML = `
                         <input type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                         <span class="text-sm">${task}</span>
                     `;
-                    document.getElementById('aiTaskList').appendChild(taskItem);
+                            document.getElementById('aiTaskList').appendChild(taskItem);
+                        });
+
+                        document.getElementById('aiTaskResult').classList.remove('hidden');
+                        document.getElementById('confirmAiTask').classList.remove('hidden');
+                        document.getElementById('generateAiTask').classList.add('hidden');
+                    } catch (error) {
+                        console.error('Error generating tasks:', error);
+                        showSpeechBubble('生成任务失败，请重试！');
+                    } finally {
+                        document.getElementById('generateAiTask').textContent = '生成任务';
+                        document.getElementById('generateAiTask').disabled = false;
+                    }
                 });
 
-                document.getElementById('aiTaskResult').classList.remove('hidden');
-                document.getElementById('confirmAiTask').classList.remove('hidden');
-                document.getElementById('generateAiTask').classList.add('hidden');
-            } catch (error) {
-                console.error('Error generating tasks:', error);
-                showSpeechBubble('生成任务失败，请重试！');
-            } finally {
-                document.getElementById('generateAiTask').textContent = '生成任务';
-                document.getElementById('generateAiTask').disabled = false;
-            }
-        });
+                // 确认添加AI任务按钮点击事件
+                document.getElementById('confirmAiTask').addEventListener('click', () => {
+                    const taskItems = document.querySelectorAll('#aiTaskList input[type="checkbox"]:checked');
+                    if (taskItems.length === 0) {
+                        showSpeechBubble('请至少选择一个任务！');
+                        return;
+                    }
 
-        // 确认添加AI任务按钮点击事件
-        document.getElementById('confirmAiTask').addEventListener('click', () => {
-            const taskItems = document.querySelectorAll('#aiTaskList input[type="checkbox"]:checked');
-            if (taskItems.length === 0) {
-                showSpeechBubble('请至少选择一个任务！');
-                return;
-            }
+                    taskItems.forEach(item => {
+                        const taskName = item.nextElementSibling.textContent.trim();
+                        const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) : 0;
+                        const newTask = {
+                            id: maxId + 1,
+                            name: taskName,
+                            completed: false,
+                            totalTime: 0
+                        };
+                        tasks.push(newTask);
+                        saveTasks();
+                    });
 
-            taskItems.forEach(item => {
-                const taskName = item.nextElementSibling.textContent.trim();
-                const newTask = {
-                    id: tasks.length + 1,
-                    name: taskName,
-                    completed: false,
-                    totalTime: 0
-                };
-                tasks.push(newTask);
-            });
+                    renderTasks();
+                    document.getElementById('aiTaskModal').style.display = 'none';
+                    showSpeechBubble('AI任务已添加到任务列表！');
+                });
 
-            renderTasks();
-            document.getElementById('aiTaskModal').style.display = 'none';
-            showSpeechBubble('AI任务已添加到任务列表！');
-        });
+                // 初始化任务列表
+                renderTasks();
 
+                // 更多选项下拉菜单控制
+                const moreOptionsBtn = document.getElementById('moreOptionsBtn');
+                const moreOptionsDropdown = document.getElementById('moreOptionsDropdown');
+                
+                // 点击更多选项按钮时显示/隐藏下拉菜单
+                moreOptionsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    moreOptionsDropdown.classList.toggle('hidden');
+                });
+                
+                // 点击页面其他地方时隐藏下拉菜单
+                document.addEventListener('click', (e) => {
+                    if (!moreOptionsBtn.contains(e.target) && !moreOptionsDropdown.contains(e.target)) {
+                        moreOptionsDropdown.classList.add('hidden');
+                    }
+                });
 
-        // function generateSmartTasks(goal) {
-        //     // 这里可以替换为实际的AI API调用
-        //     // 目前使用预设的模板进行演示
-        //     const templates = {
-        //         'data mining': [
-        //             '学习数据预处理和特征工程基础',
-        //             '掌握决策树(Decision Tree)算法原理和实现',
-        //             '学习神经网络(Neural Network)基础概念和应用',
-        //             '理解模型评估方法和指标',
-        //             '完成分类算法相关练习和测试'
-        //         ],
-        //         'default': [
-        //             '理解基本概念和原理',
-        //             '学习核心技术和方法',
-        //             '完成相关练习和实践',
-        //             '进行知识总结和复习',
-        //             '完成测试和评估'
-        //         ]
-        //     };
-
-        //     const goalLower = goal.toLowerCase();
-        //     for (const [key, tasks] of Object.entries(templates)) {
-        //         if (goalLower.includes(key)) {
-        //             return tasks;
-        //         }
-        //     }
-        //     return templates.default;
-        // }
-
-
-
-        // 初始化任务列表
-        renderTasks();
-        
-        startBtn.addEventListener('click', toggleTimer);
-        addTaskBtn.addEventListener('click', addTask);
-        resetBtn.addEventListener('click', resetTimer);
-        clearCompletedBtn.addEventListener('click', clearCompletedTasks);
-        document.getElementById('continueTaskBtn').addEventListener('click', continueTask);
-        document.getElementById('completeTaskBtn').addEventListener('click', completeTask);
+                startBtn.addEventListener('click', function() {
+                    toggleTimer();
+                    // 重置最后活动时间
+                    lastActivityTime = Date.now();
+                    console.log('Idle time:', Date.now() - lastActivityTime);
+                });
+                addTaskBtn.addEventListener('click', batchAddTask);
+                resetBtn.addEventListener('click', function() {
+                    resetTimer();
+                    // 重置最后活动时间
+                    lastActivityTime = Date.now();
+                    console.log('Idle time:', Date.now() - lastActivityTime);
+                });
+                // 注意：闲置计时器只在用户点击"开始"按钮时重置，而不是所有用户交互
+                
+                // 闲置检测函数
+                function startIdleDetection() {
+                    // 每分钟检查一次用户是否闲置
+                    idleTimer = setInterval(function() {
+                        // 如果计时器没有运行且用户已闲置5分钟（300000毫秒）
+                        const idleTime = Date.now() - lastActivityTime;
+                        console.log('Idle time:', idleTime);
+                        if (!isRunning && idleTime >= 60000) {
+                            // 播放提醒音效
+                            const remindAudio = document.getElementById('remindAudio');
+                            remindAudio.currentTime = 0;
+                            remindAudio.play();
+                            
+                            // 显示鼓励消息
+                            showSpeechBubble('嘿！已经闲置5分钟了，试试只做5分钟就可以放弃！');
+                            
+                            // 重置最后活动时间，避免重复提醒
+                            lastActivityTime = Date.now();
+                        }
+                    }, 60000); // 每分钟检查一次
+                }
+                // 在使用前获取clearCompletedBtn元素，确保DOM已加载
+                const clearCompletedBtn = document.getElementById('clearCompletedBtn');
+                if (clearCompletedBtn) {
+                    clearCompletedBtn.addEventListener('click', clearCompletedTasks);
+                } else {
+                    console.error('clearCompletedBtn元素未找到');
+                }
+                document.getElementById('continueTaskBtn').addEventListener('click', continueTask);
+                document.getElementById('completeTaskBtn').addEventListener('click', completeTask);
     </script>
 </body>
+
 </html>

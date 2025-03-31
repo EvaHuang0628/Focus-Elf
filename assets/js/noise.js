@@ -20,15 +20,26 @@ class AudioController {
 
     initializeAudioElements() {
         const audioSources = {
-            'rain': '/assets/audio/rain.mp3',
-            'cafe': '/assets/audio/cafe.mp3',
-            'nature': '/assets/audio/nature.mp3',
-            'white-noise': '/assets/audio/white-noise.mp3'
+            'rain': './assets/audio/rain.mp3',
+            'nature': './assets/audio/nature.mp3',
+            'white-noise': './assets/audio/white-noise.mp3'
         };
 
         for (const [key, src] of Object.entries(audioSources)) {
             const audio = new Audio(src);
             audio.loop = true;
+            
+            // 添加错误处理
+            audio.addEventListener('error', (e) => {
+                console.error(`音频文件 ${src} 加载失败:`, e.target.error);
+                alert(`音频文件 ${key} 加载失败，请检查网络连接或刷新页面重试。`);
+            });
+            
+            // 添加加载成功日志
+            audio.addEventListener('canplaythrough', () => {
+                console.log(`音频文件 ${src} 加载成功，可以播放`);
+            });
+            
             this.audioElements.set(key, audio);
         }
     }
