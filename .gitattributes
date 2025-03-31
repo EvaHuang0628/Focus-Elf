@@ -1,4 +1,3 @@
-# 设置音频文件的MIME类型
 *.mp3 binary
 *.ogg binary
 *.wav binary
@@ -7,3 +6,6 @@
 *.mp3 filter=lfs diff=lfs merge=lfs -text
 *.ogg filter=lfs diff=lfs merge=lfs -text
 *.wav filter=lfs diff=lfs merge=lfs -text
+
+# 确保所有音频文件都被视为二进制文件，不进行任何文本转换
+*.mp3 -diff -merge -text
