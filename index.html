@@ -902,8 +902,7 @@ function addTask() {
                 function continueTask() {
                     setTimeout(() => {
                         resetTimer();
-                        // timeLeft = 25 * 60;
-                        timeLeft = 5;
+                        timeLeft = isTestMode ? 5 : 25 * 60; // 根据模式设置初始时间
                         updateDisplay();
                         showSpeechBubble('开始新一轮计时！加油！');
                     }, 2000);

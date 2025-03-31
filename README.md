@@ -79,40 +79,6 @@
 2. 点击播放按钮开始播放
 3. 使用音量滑块调节音量大小
 
-## 音频文件配置
-
-### 音频文件路径
-
-本项目使用相对路径引用音频文件和JavaScript文件，确保在静态托管环境（如GitHub Pages）中正常工作：
-
-```
-./assets/audio/rain.mp3
-./assets/audio/nature.mp3
-./assets/audio/white-noise.mp3
-```
-
-### 音频文件MIME类型
-
-已添加`.gitattributes`文件，确保音频文件在GitHub Pages上有正确的MIME类型。如果您使用其他静态托管服务，请确保正确配置音频文件的MIME类型：
-
-- MP3: audio/mpeg
-- OGG: audio/ogg
-- WAV: audio/wav
-
-### 跨域问题
-
-如果您在部署后遇到跨域问题，请确保您的静态托管服务配置了正确的CORS（跨域资源共享）头：
-
-```
-Access-Control-Allow-Origin: *
-```
-
-或者限制为您的网站域名：
-
-```
-Access-Control-Allow-Origin: https://yourdomain.com
-```
-
 ## 注意事项
 
 - 本项目使用Google Gemini API，需要有效的API密钥才能使用智能任务拆解功能
