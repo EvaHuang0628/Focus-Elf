@@ -12,8 +12,8 @@
     <script src="./assets/js/noise.js" defer></script>
     <script src="./dist/bundle.js" defer></script>
     <!-- 添加音频元素 -->
-    <audio id="celebrationAudio" src="./celebration.mp3" preload="auto"></audio>
-    <audio id="remindAudio" src="./remind.mp3" preload="auto"></audio>
+    <audio id="celebrationAudio" src="./assets/audio/celebration.mp3" preload="auto"></audio>
+    <audio id="remindAudio" src="./assets/audio/remind.mp3" preload="auto"></audio>
     <script>
         // 在bundle.js加载完成后，从GeminiModule中获取generateSmartTasks函数
         document.addEventListener('DOMContentLoaded', function() {
@@ -283,7 +283,7 @@
                     class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
                 </div>
                 <div
-                    class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
+                    class="puzzle-block w-[100px] h-[100px] bg-blue-200 rounded opacity-0 transition-opacity duration-500">
                 </div>
                 <div
                     class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
@@ -295,7 +295,7 @@
                     class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
                 </div>
                 <div
-                    class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
+                    class="puzzle-block w-[100px] h-[100px] bg-blue-200 rounded opacity-0 transition-opacity duration-500">
                 </div>
                 <div
                     class="puzzle-block w-[100px] h-[100px] bg-[#B1D4A1] rounded opacity-0 transition-opacity duration-500">
@@ -569,7 +569,7 @@
 
                 let timer;
                 let idleTimer; // 闲置检测计时器
-                let isTestMode = true; // 控制测试模式和正常模式的切换
+                let isTestMode = false; // 控制测试模式和正常模式的切换
                 let timeLeft = isTestMode ? 5 : 25 * 60; // 根据模式设置初始时间
                 let isRunning = false;
                 let currentTask = null;
@@ -680,7 +680,6 @@
 
                                 // 播放庆祝音效
                                 const celebrationAudio = document.getElementById('celebrationAudio');
-                                console.log('celebrationAudio:', celebrationAudio);
                                 celebrationAudio.currentTime = 0; // 重置音频播放位置
                                 celebrationAudio.play();
 
@@ -1114,7 +1113,10 @@ function addTask() {
                         // 如果计时器没有运行且用户已闲置5分钟（300000毫秒）
                         const idleTime = Date.now() - lastActivityTime;
                         console.log('Idle time:', idleTime);
-                        if (!isRunning && idleTime >= 60000) {
+                        let timeThreshold = isTestMode ? 60000 : 300000; // 根据模式设置初始时间
+                        console.log('Time threshold:', timeThreshold);
+                        console.log('Compare:', idleTime >= timeThreshold);
+                        if (!isRunning && idleTime >= timeThreshold) {
                             // 播放提醒音效
                             const remindAudio = document.getElementById('remindAudio');
                             remindAudio.currentTime = 0;
