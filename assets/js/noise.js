@@ -23,8 +23,8 @@ class AudioController {
             'rain': './assets/audio/rain.mp3',
             'nature': './assets/audio/nature.mp3',
             'white-noise': './assets/audio/white-noise.mp3',
-            // 'celebration': './assets/audio/celebration.mp3',
-            // 'remind': './assets/audio/remind.mp3'
+            'celebration': './assets/audio/celebration.mp3',
+            'remind': './assets/audio/remind.mp3'
         };
 
         for (const [key, src] of Object.entries(audioSources)) {
